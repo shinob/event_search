@@ -50,7 +50,7 @@ def doorkeeper(y, m, word)
   y2 = (m == 12) ? y+1 : y
   m2 = (m == 12) ? 1 : m+1
   
-  result = get_json("https://api.doorkeeper.jp/events/?locale=ja&sort=starts_at&since=#{y}-#{m}-01&until=#{y2}-#{m2}-01&q=#{word}")
+  result = get_json("http://api.doorkeeper.jp/events/?locale=ja&sort=starts_at&since=#{y}-#{m}-01&until=#{y2}-#{m2}-01&q=#{word}")
   puts "Doorkeeper #{result.length}件, "
 
   infos = []
@@ -184,14 +184,17 @@ m1 = (m == 1) ? 12 : m-1
 y2 = (m == 12) ? y+1 : y
 m2 = (m == 12) ? 1 : m+1
 
-url = "http://" + ENV['HTTP_HOST'] + ENV['REQUEST_URI']
+url = ENV['REQUEST_URI']
+if url[0,4] != "http" then
+  url = "http://" + ENV['HTTP_HOST'] + ENV['REQUEST_URI']
+end
 base, parm = url.split('?')
 #puts base
 
 w = (cgi['w'].to_s.length == 0) ? "松江" : cgi['w']
 
 print <<EOF
-Content-Type: text/html
+Content-Type: text/html; charset=UTF-8
 
 <html>
 <head>
@@ -272,13 +275,14 @@ puts <<EOF
   <a href="#{base}?y=#{y2}&m=#{m2}&w=#{w}">#{m2}月</a>
 </div>
 <div class="link">
-  <form action="./">
+  <form action="#{base}">
+    <input type="hidden" name="y" value="#{y}" />
+    <input type="hidden" name="m" value="#{m}" />
     <input type="text" name="w" value="#{w}" />
     <input type="submit" name="設定" />
   </form>
 </div>
 EOF
-
 
 get_events(y,m,w).each do |row|
   
